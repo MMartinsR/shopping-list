@@ -34,7 +34,7 @@ function onAddItemSubmit(e) {
     itemInput.value = '';
 }
 
-function addItemToDOM(item) {
+function addItemToDOM(item) {    
     // Create list item
     const li = document.createElement('li');
     const button = createButton('remove-item btn-link text-red');
@@ -43,6 +43,8 @@ function addItemToDOM(item) {
     li.appendChild(button);
 
     // Add li to the DOM
+
+
     itemList.appendChild(li);
 }
 
@@ -85,14 +87,35 @@ function getItemsFromStorage() {
     return itemsFromStorage;    
 }
 
-function removeItem(e) {
-    if(e.target.parentElement.classList.contains('remove-item')) {  // button
-        // Confirm is a function to prompt a confirmation to the user, and its returns true or false depending on the user answer
-        if (confirm('Are you sure?')) {
-            e.target.parentElement.parentElement.remove() // li  
-            checkUI();          
-        }
+function onClickItem(e) {
+    if(e.target.parentElement.classList.contains('remove-item')) {
+        removeItem(e.target.parentElement.parentElement);
     }
+}
+
+function removeItem(item) {
+    if (confirm('Are you sure?')) {
+        // Remove item from DOM
+        item.remove();
+
+        // Remove item from storage
+        removeItemFromStorage(item.textContent);
+
+
+        checkUI();
+    }
+}
+
+function removeItemFromStorage(item) {
+    let itemsFromStorage = getItemsFromStorage();
+
+    // Filter out item to be removed
+    itemsFromStorage = itemsFromStorage.filter((i) => i !== item);
+
+    // Re-set to localStorage
+    localStorage.setItem('items', JSON.stringify(itemsFromStorage));
+
+    
 }
 
 function clearItems() {
@@ -101,8 +124,12 @@ function clearItems() {
         while(itemList.firstChild) {
             itemList.removeChild(itemList.firstChild);
         }
+
+        // Clear from localStorage
+        localStorage.removeItem('items');
+
         checkUI();
-    }
+    }    
 }
 
 function filterItems(e) {
@@ -134,7 +161,7 @@ function checkUI() {
 function init() {
     // Event Listeners
     itemForm.addEventListener('submit', onAddItemSubmit);
-    itemList.addEventListener('click', removeItem);
+    itemList.addEventListener('click', onClickItem);
     clearBtn.addEventListener('click', clearItems);
     itemFilter.addEventListener('input', filterItems);
     document.addEventListener('DOMContentLoaded', displayItems);
